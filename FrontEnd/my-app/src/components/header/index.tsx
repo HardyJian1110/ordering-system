@@ -1,19 +1,22 @@
-import React from "react";
-import { UserOutlined, PoweroffOutlined, DownOutlined } from "@ant-design/icons";
+import React, { useEffect, useState } from "react";
+import { UserOutlined, PoweroffOutlined, DownOutlined, ClockCircleFilled } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Dropdown, Space } from "antd";
+import { Dropdown, Space, Switch, message } from "antd";
 import { clearToken } from "../../store/login/authSlice";
-import { useDispatch, UseDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { getShopStatus, updateShopStatus } from "../../api/shop";
+import "./index.scss";
+
 const items: MenuProps["items"] = [
   {
     key: "1",
-    label: <a target="_blank">Personal Center</a>,
+    label: <span>Personal Center</span>,
     icon: <UserOutlined />,
   },
   {
     key: "2",
-    label: <a target="_blank">Log Out</a>,
+    label: <span>Log Out</span>,
     icon: <PoweroffOutlined />,
   },
 ];
@@ -21,6 +24,36 @@ const items: MenuProps["items"] = [
 function MyHeader() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [shopStatus, setShopStatus] = useState<number>(0);
+  const [updating, setUpdating] = useState<boolean>(false);
+
+  const loadShopStatus = async () => {
+    try {
+      const { data } = await getShopStatus();
+      setShopStatus(Number(data) === 1 ? 1 : 0);
+    } catch (error: any) {
+      message.warning(error?.message || "Failed to get business status.");
+    }
+  };
+
+  useEffect(() => {
+    loadShopStatus();
+  }, []);
+
+  const handleChangeShopStatus = async (checked: boolean) => {
+    const nextStatus = checked ? 1 : 0;
+    try {
+      setUpdating(true);
+      const { data } = await updateShopStatus(nextStatus);
+      setShopStatus(nextStatus);
+      message.success(data || "Business status updated.");
+    } catch (error: any) {
+      message.warning(error?.message || "Failed to update business status.");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   const onClick: MenuProps["onClick"] = ({ key }) => {
     if (key === "1") {
       // jump to personal center
@@ -31,16 +64,37 @@ function MyHeader() {
       sessionStorage.removeItem("username");
     }
   };
+
   return (
-    <div>
-      <Dropdown menu={{ items: items, onClick }}>
-        <a onClick={(e) => e.preventDefault()}>
-          <Space>
-            Welcome {sessionStorage.getItem("username")}
-            <DownOutlined />
-          </Space>
-        </a>
-      </Dropdown>
+    <div className="app-header-bar">
+      <div className="header-left-status">
+        <span className={shopStatus === 1 ? "status-pill is-open" : "status-pill is-closed"}>
+          {shopStatus === 1 ? "Open" : "Closed"}
+        </span>
+      </div>
+
+      <div className="header-right-area">
+        <div className="status-setting">
+          <ClockCircleFilled className="setting-icon" />
+          <span className="setting-label">Business Status Settings</span>
+          <Switch
+            checked={shopStatus === 1}
+            checkedChildren="Open"
+            unCheckedChildren="Closed"
+            loading={updating}
+            onChange={handleChangeShopStatus}
+          />
+        </div>
+
+        <Dropdown menu={{ items: items, onClick }}>
+          <span className="welcome-dropdown">
+            <Space>
+              Welcome {sessionStorage.getItem("username")}
+              <DownOutlined />
+            </Space>
+          </span>
+        </Dropdown>
+      </div>
     </div>
   );
 }

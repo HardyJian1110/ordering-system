@@ -1,5 +1,4 @@
 import { lazy } from "react";
-import CategoryPage from "../page/category";
 const Dashboard = lazy(() => import("../page/dashboard"));
 const UserList = lazy(() => import("../page/users"));
 const AddUser = lazy(() => import("../page/users/addUser"));
@@ -20,6 +19,9 @@ const Settings = lazy(() => import("../page/settings"));
 const Personal = lazy(() => import("../page/personal"));
 // ordering system
 const Setmeal = lazy(() => import("../page/setmeal"));
+const Category = lazy(() => import("../page/category"));
+const Dish = lazy(() => import("../page/dish"));
+const Employee = lazy(() => import("../page/employee"));
 
 export const componentMap: any = {
   "/dashboard": <Dashboard />,
@@ -42,5 +44,7 @@ export const componentMap: any = {
   "/personal": <Personal />,
   // ordering system
   "/setmeal": <Setmeal />,
-  "/category": <CategoryPage />,
+  "/category": <Category />,
+  "/dish": <Dish />,
+  "/employee": <Employee />,
 };

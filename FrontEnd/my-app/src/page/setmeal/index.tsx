@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Button, Card, Image, Input, Pagination, Popconfirm, Select, Table, Tag, message } from "antd";
+import { Button, Card, Image, Input, Pagination, Popconfirm, Select, Space, Table, Tag, message } from "antd";
 import type { PaginationProps, TableProps } from "antd";
 import { useDispatch } from "react-redux";
 import {
@@ -184,15 +184,11 @@ function SetmealPage() {
       key: "operate",
       width: 280,
       render: (_, record) => (
-        <div className="button">
-          <Button type="primary" size="small" onClick={() => edit(record.id)}>
+        <Space split={<span className="split-line">|</span>}>
+          <Button type="link" className="link-edit" onClick={() => edit(record.id)}>
             Edit
           </Button>
-          <Button
-            size="small"
-            className={`ml status-btn ${record.status === 1 ? "status-stop" : "status-start"}`}
-            onClick={() => changeStatus(record)}
-          >
+          <Button type="link" className={record.status === 1 ? "link-stop" : "link-start"} onClick={() => changeStatus(record)}>
             {record.status === 1 ? "Stop Sale" : "Start Sale"}
           </Button>
           <Popconfirm
@@ -202,11 +198,11 @@ function SetmealPage() {
             cancelText="No"
             onConfirm={() => deleteOne(record)}
           >
-            <Button type="primary" size="small" danger className="ml">
+            <Button type="link" danger>
               Delete
             </Button>
           </Popconfirm>
-        </div>
+        </Space>
       ),
     },
   ];
@@ -230,17 +226,17 @@ function SetmealPage() {
               ]}
               onChange={handleChangeStatus}
             />
-            <Button type="primary" onClick={handleSearch}>
+            <Button type="primary" className="search-btn" onClick={handleSearch}>
               Search
             </Button>
             <Button onClick={reset}>Reset</Button>
           </div>
 
           <div className="toolbar-right">
-            <Button type="primary" danger disabled={disabled} onClick={batchDelete}>
+            <Button type="text" className="batch-delete-btn" disabled={disabled} onClick={batchDelete}>
               Batch Delete
             </Button>
-            <Button type="primary" className="ml" onClick={add}>
+            <Button type="primary" className="ml add-setmeal-btn" onClick={add}>
               Add Setmeal
             </Button>
           </div>

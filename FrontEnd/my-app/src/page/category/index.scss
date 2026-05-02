@@ -1,4 +1,4 @@
-.setmeal {
+.category-page {
   .search-card {
     .toolbar {
       display: flex;
@@ -14,19 +14,16 @@
       flex-wrap: wrap;
     }
 
-    .toolbar-right {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      margin-left: auto;
+    .label {
+      color: #262626;
     }
 
     .name-input {
       width: 280px;
     }
 
-    .status-select {
-      width: 160px;
+    .type-select {
+      width: 180px;
     }
 
     .search-btn {
@@ -34,8 +31,16 @@
       border-color: #2f3238;
     }
 
-    .batch-delete-btn {
-      color: #ff4d4f;
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+    }
+
+    .add-dish-btn {
+      background: #2f3238;
+      border-color: #2f3238;
+      color: #fff;
     }
 
     .add-setmeal-btn {
@@ -45,34 +50,27 @@
     }
   }
 
-  .split-line {
-    color: #d9d9d9;
-  }
-
-  .link-edit {
-    color: #4096ff;
-  }
-
-  .link-start {
-    color: #52c41a;
-  }
-
-  .link-stop {
-    color: #fa8c16;
-  }
-
   .table-card {
+    .split-line {
+      color: #d9d9d9;
+    }
+
+    .link-edit {
+      color: #4096ff;
+    }
+
+    .link-start {
+      color: #52c41a;
+    }
+
+    .link-stop {
+      color: #fa8c16;
+    }
+
     .table-pagination {
       display: flex;
       justify-content: flex-end;
       margin-top: 16px;
-    }
-  }
-
-  .setmeal-image-dragger {
-    .ant-upload,
-    .ant-upload-drag-container {
-      height: 200px;
     }
   }
 

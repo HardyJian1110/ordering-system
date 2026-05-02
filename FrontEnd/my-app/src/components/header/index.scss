@@ -1,0 +1,84 @@
+.app-header-bar {
+  height: 64px;
+  width: 100%;
+  background: #f5bd1f;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  box-sizing: border-box;
+
+  .header-left-status {
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 68px;
+      height: 30px;
+      padding: 0 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .is-open {
+      background: #237804;
+    }
+
+    .is-closed {
+      background: #ff4d4f;
+    }
+  }
+
+  .header-right-area {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .status-setting {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    .setting-icon {
+      color: #1f1f1f;
+      font-size: 18px;
+    }
+
+    .setting-label {
+      color: #1f1f1f;
+      font-size: 20px;
+      font-weight: 500;
+    }
+  }
+
+  .ant-switch.ant-switch-checked {
+    background: #237804;
+  }
+
+  .ant-switch.ant-switch-checked:hover {
+    background: #389e0d !important;
+  }
+
+  .ant-switch {
+    background: #ff4d4f;
+  }
+
+  .ant-switch:hover {
+    background: #ff7875 !important;
+  }
+
+  .welcome-dropdown {
+    display: inline-flex;
+    align-items: center;
+    height: 44px;
+    padding: 0 14px;
+    border-radius: 8px;
+    background: #f3df9d;
+    color: #262626;
+    min-width: 150px;
+    justify-content: center;
+  }
+}

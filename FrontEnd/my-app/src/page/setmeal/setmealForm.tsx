@@ -6,8 +6,9 @@ import { useSelector } from "react-redux";
 import {
   addSetmeal,
   editSetmeal,
-  getDishListByCategoryId,
+  getDishCategoryList,
   getSetmealCategoryList,
+  getDishListByCategoryId,
   type CategoryItem,
   type DishItem,
   type SetmealData,
@@ -46,34 +47,42 @@ function SetmealForm(props: FormProps) {
   const [dishList, setDishList] = useState<DishItem[]>([]);
   const [defaultCategoryId, setDefaultCategoryId] = useState<number | undefined>(undefined);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const [uploadLoading, setUploadLoading] = useState<boolean>(false);
-
-  const imageUrl = Form.useWatch("image", form);
+  const [imageUrl, setImageUrl] = useState<string>("");
   const setmealDishOptions = useMemo(() => dishList.map((item) => ({ label: item.name, value: item.id })), [dishList]);
 
   const loadDishData = async () => {
-    const { data: categoryData } = await getSetmealCategoryList();
-    const enabledCategories: CategoryItem[] = (categoryData || []).filter(
-      (item: CategoryItem) => item.status === 1
-    );
-    setDefaultCategoryId(enabledCategories[0]?.id);
+    try {
+      const { data: categoryData } = await getSetmealCategoryList();
+      const enabledSetmealCategories: CategoryItem[] = (categoryData || []).filter(
+        (item: CategoryItem) => item.status === 1
+      );
+      setDefaultCategoryId(enabledSetmealCategories[0]?.id);
 
-    const dishRequestList = enabledCategories.map((item) => getDishListByCategoryId(item.id));
-    const dishResponseList = await Promise.all(dishRequestList);
-    const mergedDishList: DishItem[] = [];
-    const dishMap: Record<number, boolean> = {};
+      const { data: dishCategoryData } = await getDishCategoryList();
+      const enabledDishCategories: CategoryItem[] = (dishCategoryData || []).filter(
+        (item: CategoryItem) => item.status === 1
+      );
 
-    dishResponseList.forEach((response) => {
-      const currentDishList = (response.data || []).filter((dish: DishItem) => dish.status === 1);
-      currentDishList.forEach((dish: DishItem) => {
-        if (!dishMap[dish.id]) {
-          dishMap[dish.id] = true;
-          mergedDishList.push(dish);
-        }
+      const dishRequestList = enabledDishCategories.map((item) => getDishListByCategoryId(item.id));
+      const dishResponseList = await Promise.all(dishRequestList);
+      const mergedDishList: DishItem[] = [];
+      const dishMap: Record<number, boolean> = {};
+
+      dishResponseList.forEach((response) => {
+        const currentDishList = (response.data || []).filter((dish: DishItem) => dish.status === 1);
+        currentDishList.forEach((dish: DishItem) => {
+          if (!dishMap[dish.id]) {
+            dishMap[dish.id] = true;
+            mergedDishList.push(dish);
+          }
+        });
       });
-    });
 
-    setDishList(mergedDishList);
+      setDishList(mergedDishList);
+    } catch (error) {
+      setDishList([]);
+      message.warning("Failed to load dish list.");
+    }
   };
 
   useEffect(() => {
@@ -91,6 +100,7 @@ function SetmealForm(props: FormProps) {
     if (mode === "add") {
       form.resetFields();
       setFileList([]);
+      setImageUrl("");
       form.setFieldsValue({
         status: 0,
         setmealDishes: [],
@@ -114,6 +124,7 @@ function SetmealForm(props: FormProps) {
     });
 
     if (editData.image) {
+      setImageUrl(editData.image);
       setFileList([
         {
           uid: "-1",
@@ -123,6 +134,7 @@ function SetmealForm(props: FormProps) {
         },
       ]);
     } else {
+      setImageUrl("");
       setFileList([]);
     }
   }, [visible, mode, setmealData]);
@@ -143,31 +155,39 @@ function SetmealForm(props: FormProps) {
     return true;
   };
 
-  const customUpload = async (options: any) => {
+  const customUpload: UploadProps["customRequest"] = async (options) => {
     const { file, onSuccess, onError } = options;
     try {
-      setUploadLoading(true);
-      const { data } = await uploadImage(file as File);
-      form.setFieldValue("image", data);
-      setFileList([
-        {
-          uid: String(Date.now()),
-          name: (file as File).name,
-          status: "done",
-          url: data,
-        },
-      ]);
-      message.success("Image uploaded successfully.");
-      onSuccess?.(data);
+      const response = await uploadImage(file as File);
+      const data = response?.data;
+      if (data) {
+        setImageUrl(data);
+        form.setFieldsValue({ image: data });
+        setFileList([
+          {
+            uid: String(Date.now()),
+            name: (file as File).name,
+            status: "done",
+            url: data,
+          },
+        ]);
+        message.success("Image uploaded successfully.");
+        onSuccess?.(data);
+        return;
+      }
+      message.warning("Image upload failed.");
+      onError?.(new Error("upload failed"));
     } catch (error) {
-      onError?.(error);
-    } finally {
-      setUploadLoading(false);
+      message.warning("Image upload failed.");
+      setImageUrl("");
+      setFileList([]);
+      onError?.(error as Error);
     }
   };
 
   const handleRemoveImage = () => {
-    form.setFieldValue("image", "");
+    form.setFieldsValue({ image: "" });
+    setImageUrl("");
     setFileList([]);
   };
 
@@ -231,12 +251,22 @@ function SetmealForm(props: FormProps) {
       title={title}
       open={visible}
       onCancel={hideModal}
-      width={700}
-      onOk={handleOk}
+      width={640}
       destroyOnClose
-      styles={{ body: { paddingTop: 12, paddingBottom: 8 } }}
+      styles={{ body: { paddingTop: 8, paddingBottom: 6 } }}
+      footer={[
+        <Button key="cancel" className="modal-btn-dark" onClick={hideModal}>
+          Cancel
+        </Button>,
+        <Button key="ok" type="primary" className="modal-btn-yellow" onClick={handleOk}>
+          Confirm
+        </Button>,
+      ]}
     >
       <Form form={form} layout="vertical" size="small" style={{ maxWidth: 500 }}>
+        <Form.Item name="image" hidden>
+          <Input />
+        </Form.Item>
         <Form.Item
           label="Setmeal Name"
           name="name"
@@ -312,20 +342,18 @@ function SetmealForm(props: FormProps) {
               fileList={fileList}
               onRemove={handleRemoveImage}
               showUploadList={false}
-              style={{ width: 260, height: 260 }}
+              style={{ width: 220, height: 200 }}
             >
               {imageUrl ? (
                 <img
                   src={imageUrl}
                   alt="setmeal-preview"
-                  style={{ width: "100%", height: 220, objectFit: "cover", borderRadius: 6 }}
+                  style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 6 }}
                 />
               ) : (
                 <>
                   <p style={{ fontSize: 14, marginBottom: 8 }}>Click or drag image here to upload</p>
-                  <p style={{ color: "#8c8c8c", marginBottom: 0 }}>
-                    {uploadLoading ? "Uploading..." : "PNG/JPEG, up to 2MB"}
-                  </p>
+                  <p style={{ color: "#8c8c8c", marginBottom: 0 }}>PNG/JPEG, up to 2MB</p>
                 </>
               )}
             </Dragger>

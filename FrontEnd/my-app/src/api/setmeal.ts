@@ -86,6 +86,10 @@ export function getSetmealCategoryList() {
   return get("/admin/category/list", { type: 2 });
 }
 
+export function getDishCategoryList() {
+  return get("/admin/category/list", { type: 1 });
+}
+
 export function getDishListByCategoryId(categoryId: number) {
   return get("/admin/dish/list", { categoryId });
 }

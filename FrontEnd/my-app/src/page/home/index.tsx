@@ -20,7 +20,7 @@ function Home() {
           <NavLeft />
         </Sider>
         <Layout>
-          <Header style={{ paddingRight: "20px", background: colorBgContainer, textAlign: "right" }}>
+          <Header style={{ padding: 0, background: colorBgContainer }}>
             <MyHeader />
           </Header>
           <Content style={{ margin: "0 16px", height: "90vh", overflowY: "auto", overflowX: "hidden" }}>
