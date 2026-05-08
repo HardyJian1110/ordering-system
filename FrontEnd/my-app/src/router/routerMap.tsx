@@ -23,6 +23,7 @@ const Category = lazy(() => import("../page/category"));
 const Dish = lazy(() => import("../page/dish"));
 const Employee = lazy(() => import("../page/employee"));
 const Menu = lazy(() => import("../page/menu"));
+const Order = lazy(() => import("../page/order"));
 
 export const componentMap: any = {
   "/dashboard": <Dashboard />,
@@ -49,4 +50,5 @@ export const componentMap: any = {
   "/dish": <Dish />,
   "/employee": <Employee />,
   "/menu": <Menu />,
+  "/order": <Order />,
 };

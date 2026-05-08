@@ -9,12 +9,13 @@ function NotFound() {
         imageStyle={{ height: 60 }}
         description={
           <Typography.Text>
-            温馨提示 <a href="#API">页面走丢啦</a>
+            Kind Reminder
+            <a href="#API">Page not found</a>
           </Typography.Text>
         }
       >
         <Button type="primary">
-          <Link to="/dashboard">回到首页</Link>
+          <Link to="/dashboard">Back to Home</Link>
         </Button>
       </Empty>
     </div>
