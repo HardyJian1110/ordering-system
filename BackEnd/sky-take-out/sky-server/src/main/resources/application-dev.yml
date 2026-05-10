@@ -1,0 +1,18 @@
+sky:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    host: localhost
+    port: 3306
+    database: sky_take_out
+    username: root
+    password: haohaoxuexi1
+  r2:
+    endpoint: https://d8f632f1ca4d5e0a2929c56dd0e3e443.r2.cloudflarestorage.com
+    access-key-id: 85b48edd796ab722b96866735978aa62
+    access-key-secret: 31321d103ace6a8608f692dc2f0ea421943bc0fc4bc29f6a3fa700c618cfbed1
+    bucket-name: sky-itcast
+    public-domain: "https://pub-117d324bb6e94a9ea467b20087c8e302.r2.dev" # Domain name opened in R2 Settings
+  redis:
+    host: localhost
+    port: 6379
+    database: 0
