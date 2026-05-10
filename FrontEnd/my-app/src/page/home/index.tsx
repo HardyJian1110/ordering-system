@@ -1,14 +1,25 @@
 import { Breadcrumb, Layout, theme } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NavLeft from "../../components/navLeft";
 import MyBreadCrumb from "../../components/breadCrumb";
 import MyHeader from "../../components/header";
 import { Outlet } from "react-router-dom";
+import { startOrderReminderSocket, stopOrderReminderSocket } from "../../utils/ws/orderReminderSocket";
 
 const { Header, Content, Footer, Sider } = Layout;
 
 function Home() {
   const [collapsed, setCollapsed] = useState<boolean>(false);
+
+  useEffect(() => {
+    const username = sessionStorage.getItem("username") || "";
+    if (username) {
+      startOrderReminderSocket(username);
+    }
+    return () => {
+      stopOrderReminderSocket();
+    };
+  }, []);
 
   const {
     token: { colorBgContainer, borderRadiusLG },
