@@ -74,8 +74,11 @@ export function getCategoryList(type: 1 | 2) {
   return get("/user/category/list", { type });
 }
 
-export function getSetmealList(categoryId: number) {
-  return get("/user/setmeal/list", { categoryId });
+export function getSetmealList(categoryId?: number) {
+  if (typeof categoryId === "number") {
+    return get("/user/setmeal/list", { categoryId });
+  }
+  return get("/user/setmeal/list");
 }
 
 export function getDishList(categoryId: number) {

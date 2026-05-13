@@ -100,14 +100,21 @@ function EmployeePage() {
 
   const columns: TableProps<EmployeeRowData>["columns"] = [
     {
-      title: "Employee Name",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
       title: "Username",
       dataIndex: "username",
       key: "username",
+    },
+    {
+      title: "Role",
+      dataIndex: "role",
+      key: "role",
+      render: (value: EmployeeRowData["role"]) => value || "-",
+    },
+    {
+      title: "Sex",
+      dataIndex: "sex",
+      key: "sex",
+      render: (value: number) => (Number(value) === 1 ? "Male" : "Female"),
     },
     {
       title: "Phone",

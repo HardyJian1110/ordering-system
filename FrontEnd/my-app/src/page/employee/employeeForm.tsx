@@ -1,4 +1,4 @@
-import { Button, Form, Input, Modal, Radio, message } from "antd";
+import { Button, Form, Input, Modal, Radio, Select, Typography, message } from "antd";
 import { useEffect } from "react";
 import { addEmployee, editEmployee, type EmployeeData, type EmployeeRowData } from "../../api/employee";
 
@@ -17,9 +17,16 @@ interface EmployeeFormValues {
   phone: string;
   sex: number;
   idNumber: string;
+  role: "admin" | "manager" | "user";
+  password?: string;
 }
 
 const compactItemStyle = { marginBottom: 12 };
+const roleOptions = [
+  { label: "Admin", value: "admin" },
+  { label: "Manager", value: "manager" },
+  { label: "User", value: "user" },
+];
 
 function EmployeeForm(props: EmployeeFormProps) {
   const { visible, title, hideModal, loadData, mode, currentData } = props;
@@ -32,7 +39,7 @@ function EmployeeForm(props: EmployeeFormProps) {
 
     if (mode === "add") {
       form.resetFields();
-      form.setFieldsValue({ sex: 1 });
+      form.setFieldsValue({ sex: 1, role: "user", password: "" });
       return;
     }
 
@@ -42,6 +49,8 @@ function EmployeeForm(props: EmployeeFormProps) {
       phone: currentData.phone,
       sex: Number(currentData.sex ?? 1),
       idNumber: currentData.idNumber,
+      role: (currentData.role as "admin" | "manager" | "user") || "user",
+      password: "",
     });
   }, [visible, mode, currentData, form]);
 
@@ -55,7 +64,15 @@ function EmployeeForm(props: EmployeeFormProps) {
         phone: values.phone,
         sex: Number(values.sex),
         idNumber: values.idNumber,
+        role: values.role,
       };
+      const passwordValue = values.password?.trim();
+      if (mode === "add") {
+        submitData.password = passwordValue || "";
+      }
+      if (mode === "edit" && passwordValue) {
+        submitData.password = passwordValue;
+      }
 
       const request = mode === "edit" ? editEmployee(submitData) : addEmployee(submitData);
       const { data } = await request;
@@ -104,12 +121,17 @@ function EmployeeForm(props: EmployeeFormProps) {
           <Input placeholder="Please enter employee name" />
         </Form.Item>
 
+        <Form.Item label="Phone" name="phone" style={compactItemStyle}>
+          <Input placeholder="Please enter phone" maxLength={11} />
+        </Form.Item>
+
         <Form.Item
-          label="Phone"
-          name="phone"
+          label="Role"
+          name="role"
+          rules={[{ required: true, message: "Please select role." }]}
           style={compactItemStyle}
         >
-          <Input placeholder="Please enter phone" maxLength={11} />
+          <Select placeholder="Please select role" options={roleOptions} />
         </Form.Item>
 
         <Form.Item label="Gender" name="sex" style={compactItemStyle}>
@@ -126,6 +148,20 @@ function EmployeeForm(props: EmployeeFormProps) {
           style={compactItemStyle}
         >
           <Input placeholder="Please enter ID number" />
+        </Form.Item>
+
+        <Form.Item
+          label="Password"
+          name="password"
+          rules={mode === "add" ? [{ required: true, message: "Please input password." }] : []}
+          extra={
+            mode === "edit" ? (
+              <Typography.Text type="secondary">Leave blank if you do not want to change password.</Typography.Text>
+            ) : null
+          }
+          style={compactItemStyle}
+        >
+          <Input.Password placeholder={mode === "add" ? "Please enter password" : "Enter new password (optional)"} />
         </Form.Item>
       </Form>
     </Modal>

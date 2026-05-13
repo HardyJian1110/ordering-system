@@ -3,17 +3,18 @@ import { UserOutlined, PoweroffOutlined, DownOutlined, ClockCircleFilled } from 
 import type { MenuProps } from "antd";
 import { Dropdown, Space, Switch, message } from "antd";
 import { clearToken } from "../../store/login/authSlice";
+import { setShopStatus as setShopStatusAction } from "../../store/shop/shopSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getShopStatus, updateShopStatus } from "../../api/shop";
 import "./index.scss";
 
 const items: MenuProps["items"] = [
-  {
-    key: "1",
-    label: <span>Personal Center</span>,
-    icon: <UserOutlined />,
-  },
+  // {
+  //   key: "1",
+  //   label: <span>Personal Center</span>,
+  //   icon: <UserOutlined />,
+  // },
   {
     key: "2",
     label: <span>Log Out</span>,
@@ -30,7 +31,9 @@ function MyHeader() {
   const loadShopStatus = async () => {
     try {
       const { data } = await getShopStatus();
-      setShopStatus(Number(data) === 1 ? 1 : 0);
+      const nextStatus = Number(data) === 1 ? 1 : 0;
+      setShopStatus(nextStatus);
+      dispatch(setShopStatusAction(nextStatus));
     } catch (error: any) {
       message.warning(error?.message || "Failed to get business status.");
     }
@@ -46,6 +49,7 @@ function MyHeader() {
       setUpdating(true);
       const { data } = await updateShopStatus(nextStatus);
       setShopStatus(nextStatus);
+      dispatch(setShopStatusAction(nextStatus));
       message.success(data || "Business status updated.");
     } catch (error: any) {
       message.warning(error?.message || "Failed to update business status.");

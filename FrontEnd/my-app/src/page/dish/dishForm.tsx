@@ -137,8 +137,8 @@ function DishForm(props: DishFormProps) {
       }
       message.warning(msg || "Image upload failed.");
       onError?.(new Error(msg || "upload failed"));
-    } catch (error) {
-      message.warning("Image upload failed.");
+    } catch (error: any) {
+      message.warning(error?.message || "Image upload failed.");
       setImageUrl("");
       setFileList([]);
       onError?.(error as Error);
@@ -240,7 +240,11 @@ function DishForm(props: DishFormProps) {
               style={{ width: 240, height: 190 }}
             >
               {imageUrl ? (
-                <img src={imageUrl} alt="dish-preview" style={{ width: "100%", height: 145, objectFit: "cover", borderRadius: 6 }} />
+                <img
+                  src={imageUrl}
+                  alt="dish-preview"
+                  style={{ width: "100%", height: 145, objectFit: "cover", borderRadius: 6 }}
+                />
               ) : (
                 <>
                   <p style={{ fontSize: 14, marginBottom: 8 }}>Click or drag image here to upload</p>

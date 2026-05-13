@@ -53,10 +53,9 @@ function SetmealForm(props: FormProps) {
   const loadDishData = async () => {
     try {
       const { data: categoryData } = await getSetmealCategoryList();
-      const enabledSetmealCategories: CategoryItem[] = (categoryData || []).filter(
-        (item: CategoryItem) => item.status === 1
-      );
-      setDefaultCategoryId(enabledSetmealCategories[0]?.id);
+      const allSetmealCategories: CategoryItem[] = categoryData || [];
+      const enabledSetmealCategories: CategoryItem[] = allSetmealCategories.filter((item: CategoryItem) => item.status === 1);
+      setDefaultCategoryId(enabledSetmealCategories[0]?.id || allSetmealCategories[0]?.id);
 
       const { data: dishCategoryData } = await getDishCategoryList();
       const enabledDishCategories: CategoryItem[] = (dishCategoryData || []).filter(
@@ -177,8 +176,8 @@ function SetmealForm(props: FormProps) {
       }
       message.warning("Image upload failed.");
       onError?.(new Error("upload failed"));
-    } catch (error) {
-      message.warning("Image upload failed.");
+    } catch (error: any) {
+      message.warning(error?.message || "Image upload failed.");
       setImageUrl("");
       setFileList([]);
       onError?.(error as Error);
@@ -211,12 +210,7 @@ function SetmealForm(props: FormProps) {
       return;
     }
 
-    const submitCategoryId =
-      mode === "edit" ? Number((setmealData as SetmealData).categoryId) : Number(defaultCategoryId);
-    if (!submitCategoryId) {
-      message.warning("No available setmeal category was found.");
-      return;
-    }
+    const submitCategoryId = mode === "edit" ? Number((setmealData as SetmealData).categoryId) : Number(defaultCategoryId || 0);
 
     const setmealDishes = values.setmealDishes.map((item) => {
       const targetDish = dishList.find((dish) => dish.id === item.dishId);

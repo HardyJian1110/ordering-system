@@ -11,11 +11,12 @@ interface CheckoutModalProps {
   open: boolean;
   totalPrice: number;
   confirmLoading: boolean;
+  shopOpen: boolean;
   onCancel: () => void;
   onSubmit: (values: CheckoutFormValues) => Promise<void> | void;
 }
 
-function CheckoutModal({ open, totalPrice, confirmLoading, onCancel, onSubmit }: CheckoutModalProps) {
+function CheckoutModal({ open, totalPrice, confirmLoading, shopOpen, onCancel, onSubmit }: CheckoutModalProps) {
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -29,6 +30,9 @@ function CheckoutModal({ open, totalPrice, confirmLoading, onCancel, onSubmit }:
   }, [form, open]);
 
   const handleOk = async () => {
+    if (!shopOpen) {
+      return;
+    }
     const values = await form.validateFields();
     await onSubmit(values as CheckoutFormValues);
   };
@@ -43,8 +47,9 @@ function CheckoutModal({ open, totalPrice, confirmLoading, onCancel, onSubmit }:
       confirmLoading={confirmLoading}
       className="menu-checkout-modal"
       cancelButtonProps={{ className: "menu-modal-cancel-btn" }}
-      okButtonProps={{ className: "menu-modal-ok-btn" }}
+      okButtonProps={{ className: "menu-modal-ok-btn", disabled: !shopOpen }}
     >
+      {!shopOpen ? <div className="checkout-closed-tip">The store is currently closed.</div> : null}
       <Form form={form} layout="vertical" initialValues={{ diningMode: 1 }}>
         <Form.Item label="Dining Mode" name="diningMode" rules={[{ required: true, message: "Please choose dining mode." }]}>
           <Segmented
@@ -54,6 +59,7 @@ function CheckoutModal({ open, totalPrice, confirmLoading, onCancel, onSubmit }:
               { label: "Takeout", value: 2 },
             ]}
             block
+            disabled={!shopOpen}
           />
         </Form.Item>
 
@@ -65,14 +71,14 @@ function CheckoutModal({ open, totalPrice, confirmLoading, onCancel, onSubmit }:
             }
             return (
               <Form.Item label="Table Number" name="tableNumber" rules={[{ required: true, message: "Please enter table number." }]}>
-                <InputNumber min={1} style={{ width: "100%" }} placeholder="Enter table number" />
+                <InputNumber min={1} style={{ width: "100%" }} placeholder="Enter table number" disabled={!shopOpen} />
               </Form.Item>
             );
           }}
         </Form.Item>
 
         <Form.Item label="Remark" name="remark">
-          <Input.TextArea rows={3} placeholder="Optional note for this order" maxLength={200} />
+          <Input.TextArea rows={3} placeholder="Optional note for this order" maxLength={200} disabled={!shopOpen} />
         </Form.Item>
 
         <Form.Item label="Order Amount">

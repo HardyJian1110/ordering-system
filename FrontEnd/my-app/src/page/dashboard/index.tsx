@@ -1,273 +1,290 @@
-import { Row, Col, Card, Progress, Statistic, Timeline, Tag } from "antd";
-import { RadarChartOutlined, SnippetsOutlined, DollarOutlined, LaptopOutlined } from "@ant-design/icons";
-import ReactECharts from "echarts-for-react";
-import { getEnergyData } from "../../api/dashboard";
-import { useEffect, useState } from "react";
+﻿import {
+  BarChartOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  DollarOutlined,
+  FileDoneOutlined,
+  InboxOutlined,
+  PercentageOutlined,
+  PlusCircleOutlined,
+  ShoppingCartOutlined,
+  TagsOutlined,
+  WalletOutlined,
+} from "@ant-design/icons";
+import { Card, Spin } from "antd";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  getBusinessData,
+  getDishOverview,
+  getOrderOverview,
+  getSetmealOverview,
+  type BusinessData,
+  type DishOverviewData,
+  type OrderOverviewData,
+  type SetmealOverviewData,
+} from "../../api/dashboard";
 import "./index.scss";
 
-const option2 = {
-  title: {
-    text: "Enterprise Qualifications (Units)",
-  },
-  tooltip: {
-    trigger: "axis",
-    axisPointer: {
-      type: "shadow",
-    },
-  },
-  legend: {},
-  grid: {
-    left: "3%",
-    right: "4%",
-    bottom: "15%",
-    containLabel: true,
-  },
-  xAxis: {
-    type: "category",
-    boundaryGap: [0, 0.01],
-    data: ["2014", "2016", "2018", "2020", "2022", "2024"],
-  },
-  yAxis: {
-    type: "value",
-  },
-  series: [
-    {
-      name: "Tech Enterprises",
-      type: "bar",
-      data: [40, 220, 378, 658, 1122, 1200],
-    },
-    {
-      name: "High-tech Enterprises",
-      type: "bar",
-      data: [20, 39, 443, 490, 559, 762],
-    },
-    {
-      name: "State-owned Enterprises",
-      type: "bar",
-      data: [78, 167, 229, 330, 380, 420],
-    },
-  ],
+const initialBusinessData: BusinessData = {
+  turnover: 0,
+  validOrderCount: 0,
+  orderCompletionRate: 0,
+  unitPrice: 0,
 };
 
-const option3 = {
-  legend: {
-    top: "10px",
-  },
-  series: [
-    {
-      name: "Nightingale Chart",
-      type: "pie",
-      radius: [30, 100],
-      center: ["50%", "50%"],
-      roseType: "area",
-      itemStyle: {
-        borderRadius: 8,
-      },
-      data: [
-        { value: 40, name: "In Operation" },
-        { value: 38, name: "Leased" },
-        { value: 32, name: "To Let" },
-        { value: 30, name: "Renewed" },
-        { value: 28, name: "Newly Signed" },
-        { value: 26, name: "Vacant" },
-        { value: 22, name: "Terminated" },
-      ],
-    },
-  ],
+const initialOrderOverview: OrderOverviewData = {
+  waitingOrders: 0,
+  deliveredOrders: 0,
+  completedOrders: 0,
+  cancelledOrders: 0,
+  allOrders: 0,
+};
+
+const initialDishOverview: DishOverviewData = {
+  sold: 0,
+  discontinued: 0,
+};
+
+const initialSetmealOverview: SetmealOverviewData = {
+  sold: 0,
+  discontinued: 0,
 };
 
 function Dashboard() {
-  const initalOption = {
-    title: {
-      text: "Daily Energy Consumption",
-    },
-    tooltip: {
-      trigger: "axis",
-    },
-    legend: {
-      data: [],
-    },
-    grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "3%",
-      containLabel: true,
-    },
-    toolbox: {
-      feature: {
-        saveAsImage: {},
-      },
-    },
-    xAxis: {
-      type: "category",
-      boundaryGap: false,
-      data: ["0:00", "4:00", "8:00", "12:00", "16:00", "20:00", "24:00"],
-    },
-    yAxis: {
-      type: "value",
-    },
-    series: [],
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [businessData, setBusinessData] = useState<BusinessData>(initialBusinessData);
+  const [orderOverview, setOrderOverview] = useState<OrderOverviewData>(initialOrderOverview);
+  const [dishOverview, setDishOverview] = useState<DishOverviewData>(initialDishOverview);
+  const [setmealOverview, setSetmealOverview] = useState<SetmealOverviewData>(initialSetmealOverview);
+
+  const today = useMemo(() => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    return `${y}.${m}.${d}`;
+  }, []);
+
+  const toNumber = (value: unknown) => {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : 0;
   };
 
-  const [data, setData] = useState(initalOption);
+  const formatMoney = (value: number) => `€${toNumber(value).toFixed(2)}`;
+
+  const formatRate = (value: number) => `${(toNumber(value) * 100).toFixed(2)}%`;
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [businessRes, orderRes, dishRes, setmealRes] = await Promise.all([
+        getBusinessData(),
+        getOrderOverview(),
+        getDishOverview(),
+        getSetmealOverview(),
+      ]);
+
+      setBusinessData({
+        turnover: toNumber(businessRes.data?.turnover),
+        validOrderCount: toNumber(businessRes.data?.validOrderCount),
+        orderCompletionRate: toNumber(businessRes.data?.orderCompletionRate),
+        unitPrice: toNumber(businessRes.data?.unitPrice),
+      });
+
+      setOrderOverview({
+        waitingOrders: toNumber(orderRes.data?.waitingOrders),
+        deliveredOrders: toNumber(orderRes.data?.deliveredOrders),
+        completedOrders: toNumber(orderRes.data?.completedOrders),
+        cancelledOrders: toNumber(orderRes.data?.cancelledOrders),
+        allOrders: toNumber(orderRes.data?.allOrders),
+      });
+
+      setDishOverview({
+        sold: toNumber(dishRes.data?.sold),
+        discontinued: toNumber(dishRes.data?.discontinued),
+      });
+
+      setSetmealOverview({
+        sold: toNumber(setmealRes.data?.sold),
+        discontinued: toNumber(setmealRes.data?.discontinued),
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadData = async () => {
-      const { data: apiData } = await getEnergyData();
-      const dataList = apiData.map((item: any) => ({
-        name: item.name,
-        data: item.data,
-        type: "line",
-        stack: "Total",
-      }));
-      const updataOption = {
-        ...data,
-        legend: {
-          data: dataList.map((item: any) => item.name),
-        },
-        series: dataList,
-        grid: {
-          top: "80px",
-          left: "3%",
-          right: "4%",
-          bottom: "15%",
-          containLabel: true,
-        },
-      };
-      setData(updataOption);
-    };
     loadData();
   }, []);
 
+  if (loading) {
+    return (
+      <div className="dashboard-loading">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
   return (
-    <div className="dashboard">
-      <Row gutter={16}>
-        <Col span={6}>
-          <Card className="clearfix">
-            <div className="fl area">
-              <h2>13479</h2>
-              <p>Total Park Area (㎡)</p>
-            </div>
-            <div className="fr">
-              <RadarChartOutlined className="icon" />
-            </div>
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card className="clearfix">
-            <div className="fl area">
-              <h2>8635</h2>
-              <p>Total Leased Area (㎡)</p>
-            </div>
-            <div className="fr">
-              <SnippetsOutlined className="icon" style={{ color: "#81c452" }} />
-            </div>
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card className="clearfix">
-            <div className="fl area">
-              <h2>38764</h2>
-              <p>Total Output Value (10k euro)</p>
-            </div>
-            <div className="fr">
-              <DollarOutlined className="icon" style={{ color: "#62c9cb" }} />
-            </div>
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card className="clearfix">
-            <div className="fl area">
-              <h2>2874</h2>
-              <p>Total Resident Enterprises</p>
-            </div>
-            <div className="fr">
-              <LaptopOutlined className="icon" style={{ color: "#e49362" }} />
-            </div>
-          </Card>
-        </Col>
-      </Row>
+    <div className="dashboard-workspace">
+      <Card className="workspace-section">
+        <div className="section-head">
+          <div className="section-title-wrap">
+            <h2 className="section-title">Today Data</h2>
+            <span className="section-date">{today}</span>
+          </div>
+        </div>
 
-      <Row gutter={16} className="mt">
-        <Col span={12}>
-          <Card title="Energy Consumption Status">
-            <ReactECharts option={data}></ReactECharts>
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card title="Enterprise Qualifications">
-            <ReactECharts option={option2}></ReactECharts>
-          </Card>
-        </Col>
-      </Row>
-
-      <Row gutter={16} className="mt">
-        <Col span={12}>
-          <Card title="Leasing Status">
-            <ReactECharts option={option3}></ReactECharts>
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card title="Charging Pile Availability">
-            <div className="wrap">
-              <Progress type="circle" percent={75} />
-              <Statistic title="Total Charging Piles" value={75} suffix="/ 100" className="mt" />
+        <div className="metrics-grid metrics-grid-4">
+          <div className="metric-card with-icon horizontal">
+            <div className="metric-left">
+              <WalletOutlined className="metric-icon" />
+              <div className="metric-label">Turnover</div>
             </div>
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card title="Real-time Vehicle Info" style={{ height: "406px" }}>
-            <Timeline
-              items={[
-                {
-                  children: (
-                    <>
-                      <Tag color="green">Entry</Tag>08:24 Vehicle A66666
-                    </>
-                  ),
-                },
-                {
-                  children: (
-                    <>
-                      <Tag color="red">Exit</Tag>09:15 Vehicle A66666{" "}
-                    </>
-                  ),
-                  color: "red",
-                },
-                {
-                  children: (
-                    <>
-                      <Tag color="green">Entry</Tag>09:22 Vehicle A23456{" "}
-                    </>
-                  ),
-                },
-                {
-                  children: (
-                    <>
-                      <Tag color="red">Exit</Tag>10:43 Vehicle A18763{" "}
-                    </>
-                  ),
-                  color: "red",
-                },
-                {
-                  children: (
-                    <>
-                      <Tag color="green">Entry</Tag>13:38 Vehicle A88888{" "}
-                    </>
-                  ),
-                },
-                {
-                  children: (
-                    <>
-                      <Tag color="green">Entry</Tag>14:46 Vehicle A23456{" "}
-                    </>
-                  ),
-                },
-              ]}
-            />
-          </Card>
-        </Col>
-      </Row>
+            <div className="metric-value">{formatMoney(businessData.turnover)}</div>
+          </div>
+
+          <div className="metric-card with-icon horizontal">
+            <div className="metric-left">
+              <BarChartOutlined className="metric-icon" />
+              <div className="metric-label">Valid Orders</div>
+            </div>
+            <div className="metric-value">{businessData.validOrderCount}</div>
+          </div>
+
+          <div className="metric-card with-icon horizontal">
+            <div className="metric-left">
+              <PercentageOutlined className="metric-icon" />
+              <div className="metric-label">Order Completion Rate</div>
+            </div>
+            <div className="metric-value">{formatRate(businessData.orderCompletionRate)}</div>
+          </div>
+
+          <div className="metric-card with-icon horizontal">
+            <div className="metric-left">
+              <DollarOutlined className="metric-icon" />
+              <div className="metric-label">Average Order Value</div>
+            </div>
+            <div className="metric-value">{formatMoney(businessData.unitPrice)}</div>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="workspace-section">
+        <div className="section-head">
+          <div className="section-title-wrap">
+            <h2 className="section-title">Order Management</h2>
+            <span className="section-date">{today}</span>
+          </div>
+          <button className="section-link" onClick={() => navigate("/order")}>Order Details</button>
+        </div>
+
+        <div className="metrics-grid metrics-grid-5">
+          <div className="metric-card with-icon horizontal">
+            <div className="metric-left">
+              <InboxOutlined className="metric-icon" />
+              <div className="metric-label">To Be Confirmed</div>
+            </div>
+            <div className="metric-value small">{orderOverview.waitingOrders}</div>
+          </div>
+
+          <div className="metric-card with-icon horizontal">
+            <div className="metric-left">
+              <ShoppingCartOutlined className="metric-icon" />
+              <div className="metric-label">Confirmed</div>
+            </div>
+            <div className="metric-value small">{orderOverview.deliveredOrders}</div>
+          </div>
+
+          <div className="metric-card with-icon horizontal">
+            <div className="metric-left">
+              <FileDoneOutlined className="metric-icon" />
+              <div className="metric-label">Completed</div>
+            </div>
+            <div className="metric-value small">{orderOverview.completedOrders}</div>
+          </div>
+
+          <div className="metric-card with-icon horizontal">
+            <div className="metric-left">
+              <CloseCircleOutlined className="metric-icon" />
+              <div className="metric-label">Cancelled</div>
+            </div>
+            <div className="metric-value small">{orderOverview.cancelledOrders}</div>
+          </div>
+
+          <div className="metric-card with-icon horizontal">
+            <div className="metric-left">
+              <CheckCircleOutlined className="metric-icon" />
+              <div className="metric-label">All Orders</div>
+            </div>
+            <div className="metric-value small">{orderOverview.allOrders}</div>
+          </div>
+        </div>
+      </Card>
+
+      <div className="overview-row">
+        <Card className="workspace-section half">
+          <div className="section-head">
+            <h2 className="section-title">Dish Overview</h2>
+            <button className="section-link" onClick={() => navigate("/dish")}>Dish Management</button>
+          </div>
+
+          <div className="metrics-grid metrics-grid-3">
+            <div className="metric-card with-icon horizontal">
+              <div className="metric-left">
+                <TagsOutlined className="metric-icon" />
+                <div className="metric-label">Sold</div>
+              </div>
+              <div className="metric-value small">{dishOverview.sold}</div>
+            </div>
+
+            <div className="metric-card with-icon horizontal">
+              <div className="metric-left">
+                <TagsOutlined className="metric-icon" />
+                <div className="metric-label">Discontinued</div>
+              </div>
+              <div className="metric-value small">{dishOverview.discontinued}</div>
+            </div>
+
+            <button className="add-card" onClick={() => navigate("/dish")}>
+              <PlusCircleOutlined className="add-icon" />
+              <span>Add Dish</span>
+            </button>
+          </div>
+        </Card>
+
+        <Card className="workspace-section half">
+          <div className="section-head">
+            <h2 className="section-title">Setmeal Overview</h2>
+            <button className="section-link" onClick={() => navigate("/setmeal")}>Setmeal Management</button>
+          </div>
+
+          <div className="metrics-grid metrics-grid-3">
+            <div className="metric-card with-icon horizontal">
+              <div className="metric-left">
+                <TagsOutlined className="metric-icon" />
+                <div className="metric-label">Sold</div>
+              </div>
+              <div className="metric-value small">{setmealOverview.sold}</div>
+            </div>
+
+            <div className="metric-card with-icon horizontal">
+              <div className="metric-left">
+                <TagsOutlined className="metric-icon" />
+                <div className="metric-label">Discontinued</div>
+              </div>
+              <div className="metric-value small">{setmealOverview.discontinued}</div>
+            </div>
+
+            <button className="add-card" onClick={() => navigate("/setmeal")}>
+              <PlusCircleOutlined className="add-icon" />
+              <span>Add Setmeal</span>
+            </button>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }

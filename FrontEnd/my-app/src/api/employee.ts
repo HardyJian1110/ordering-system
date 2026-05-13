@@ -14,6 +14,8 @@ export interface EmployeeData {
   sex: number;
   idNumber: string;
   status?: number;
+  role?: "admin" | "manager" | "user";
+  password?: string;
 }
 
 export interface EmployeeRowData {
@@ -25,6 +27,8 @@ export interface EmployeeRowData {
   idNumber: string;
   status: number;
   updateTime: string;
+  role?: "admin" | "manager" | "user";
+  password?: string;
 }
 
 export function getEmployeePage(data: EmployeeSearchType) {

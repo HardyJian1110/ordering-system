@@ -28,13 +28,23 @@ http.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    if (error.response && error.response.status === 401) {
+    const status = error?.response?.status;
+    const backendMsg =
+      error?.response?.data?.msg ||
+      error?.response?.data?.message ||
+      error?.message ||
+      "Request failed.";
+
+    if (status === 401) {
       sessionStorage.clear();
 
       message.error("Your session has expired, please login again.");
       window.location.href = "/login";
+      return Promise.reject(new Error("Your session has expired, please login again."));
     }
-    return Promise.reject(error);
+
+    message.error(backendMsg);
+    return Promise.reject(new Error(backendMsg));
   }
 );
 

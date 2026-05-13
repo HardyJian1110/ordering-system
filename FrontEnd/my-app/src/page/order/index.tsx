@@ -370,14 +370,6 @@ function OrderPage() {
               <span className="detail-value">{detailData.orderTime || "-"}</span>
             </div>
             <div className="detail-line">
-              <span className="detail-key">Phone</span>
-              <span className="detail-value">{detailData.phone || "-"}</span>
-            </div>
-            <div className="detail-line">
-              <span className="detail-key">Address</span>
-              <span className="detail-value">{detailData.address || "-"}</span>
-            </div>
-            <div className="detail-line">
               <span className="detail-key">Dining Mode</span>
               <span className="detail-value">{detailData.diningMode === 1 ? "Dine-in" : "Takeout"}</span>
             </div>
