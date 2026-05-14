@@ -26,9 +26,18 @@
             <if test="updateTime != null">update_Time = #{updateTime},</if>
             <if test="updateUser != null">update_User = #{updateUser},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="role != null">role = #{role},</if>
         </set>
         where id = #{id}
     </update>
+
+    <select id="getByUsernameAndNotId" resultType="com.sky.entity.Employee">
+        select * from employee
+        where username = #{username}
+          and id != #{id}
+        limit 1
+    </select>
+
 
 
 </mapper>

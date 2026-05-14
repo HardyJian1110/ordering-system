@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sky.mapper.OrderMapper">
+
+
+    <insert id="insert" parameterType="Orders" useGeneratedKeys="true" keyProperty="id">
+        insert into orders (user_id, order_time, pay_status,status, dining_mode,table_number,remark,amount,number)
+        values (#{userId}, #{orderTime}, #{payStatus},#{status},#{diningMode},#{tableNumber},#{remark},#{amount},#{number})
+    </insert>
+
+    <select id="pageQuery" resultType="com.sky.entity.Orders">
+            select o.*, e.username as username from orders o left join employee e on o.user_id = e.id
+            <where>
+                <if test="number != null and number!=''">
+                    and number like concat('%',#{number},'%')
+                </if>
+                <if test="userId != null">
+                    and user_id = #{userId}
+                </if>
+                <if test="status != null">
+                    and o.status = #{status}
+                </if>
+                <if test="beginTime != null">
+                    and order_time &gt;= #{beginTime}
+                </if>
+                <if test="endTime != null">
+                    and order_time &lt;= #{endTime}
+                </if>
+                <if test="tableNumber != null">
+                    and table_number = #{tableNumber}
+                </if>
+            </where>
+            order by order_time desc
+    </select>
+
+    <update id="updateStatus">
+        update orders set status = #{status} where id = #{id}
+    </update>
+
+    <select id="countByMap" resultType="java.lang.Integer" >
+        select count(id) from orders
+        <where>
+            <if test="begin != null">
+                and order_time &gt; #{begin}
+            </if>
+            <if test="end != null">
+                and order_time &lt; #{end}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="sumByMap" resultType="java.lang.Double">
+        select sum(amount) from orders
+        <where>
+            <if test="begin != null">
+                and order_time &gt; #{begin}
+            </if>
+            <if test="end != null">
+                and order_time &lt; #{end}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

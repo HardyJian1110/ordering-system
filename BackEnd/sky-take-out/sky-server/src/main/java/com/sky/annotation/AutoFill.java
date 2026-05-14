@@ -10,6 +10,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AutoFill {
-    // Database operation tyep: UPDATE / INSERT
+    // Database operation tyep: UPDATE /  INSERT
     OperationType value();
 }

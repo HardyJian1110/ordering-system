@@ -24,6 +24,6 @@ public class BusinessDataVO implements Serializable {
 
     private Double unitPrice;//平均客单价
 
-    private Integer newUsers;//新增用户数
+    //private Integer newUsers;//新增用户数
 
 }

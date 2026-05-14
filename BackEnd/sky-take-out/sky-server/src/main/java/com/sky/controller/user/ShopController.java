@@ -14,7 +14,7 @@ import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 @RestController("userShopController")
 @RequestMapping("/user/shop")
 @Slf4j
-@Api(tags = "Shop interfaces")
+@Api(tags = "User- shop interfaces")
 public class ShopController {
     public static final String KEY = "SHOP_STATUS";
     @Autowired

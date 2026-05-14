@@ -11,11 +11,10 @@ import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
-import com.sky.exception.AccountLockedException;
-import com.sky.exception.AccountNotFoundException;
-import com.sky.exception.PasswordErrorException;
+import com.sky.exception.*;
 import com.sky.mapper.EmployeeMapper;
 import com.sky.result.PageResult;
+import com.sky.result.Result;
 import com.sky.service.EmployeeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,9 +75,15 @@ public class EmployeeServiceImpl implements EmployeeService {
             employee.setStatus(StatusConstant.ENABLE);
 //            employee.setCreateTime(LocalDateTime.now());
 //            employee.setUpdateTime(LocalDateTime.now());
-            employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
+            employee.setPassword(DigestUtils.md5DigestAsHex(employeeDTO.getPassword().getBytes()));
 //            employee.setCreateUser(BaseContext.getCurrentId());
 //            employee.setUpdateUser(BaseContext.getCurrentId());
+
+        // 1) check if username already exists
+        Employee exist = employeeMapper.getByUsername(employeeDTO.getUsername());
+        if (exist != null) {
+            throw new AccountAlreadyExistsException(MessageConstant.ALREADY_EXISTS+"111111");
+        }
 
             employeeMapper.insert(employee);
 
@@ -118,9 +123,15 @@ public class EmployeeServiceImpl implements EmployeeService {
     // Edit information of employee
     @Override
     public void update(EmployeeDTO employeeDTO) {
+        // 1) check if username already exists
+        Employee exist = employeeMapper.getByUsernameAndNotId(employeeDTO.getUsername(), employeeDTO.getId());
+        if (exist != null) {
+            throw new AccountAlreadyExistsException("Username: "+employeeDTO.getUsername()+" "+MessageConstant.ALREADY_EXISTS);
+        }
+
         Employee employee = new Employee();
         BeanUtils.copyProperties(employeeDTO,employee);
-        employee.setId(BaseContext.getCurrentId());
+//        employee.setId(BaseContext.getCurrentId());
         employeeMapper.update(employee);
     }
 

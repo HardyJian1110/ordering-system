@@ -15,9 +15,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DishOverViewVO implements Serializable {
-    // 已启售数量
+    // on sale number
     private Integer sold;
 
-    // 已停售数量
+    // stopped number
     private Integer discontinued;
 }

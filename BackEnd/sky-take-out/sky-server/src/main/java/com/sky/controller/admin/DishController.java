@@ -11,9 +11,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/admin/dish")
@@ -24,6 +26,9 @@ public class DishController {
     @Autowired
     private DishService dishService;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
 
     // add a dish
     @ApiOperation("Add a dish")
@@ -31,6 +36,10 @@ public class DishController {
     public Result save(@RequestBody DishDTO dishDTO){
         log.info("Add a dish: {}", dishDTO);
         dishService.saveWithFlavor(dishDTO);
+
+        // clear the cache of redis
+        cleanCache("dish_" + dishDTO.getCategoryId());
+
         return Result.success();
     }
 
@@ -47,6 +56,10 @@ public class DishController {
     public Result delete(@RequestParam List<Long> ids){
         log.info("Delete a batch of dishes： {}", ids);
         dishService.deleteBatch(ids);
+
+        // delete all dishes in redis
+        cleanCache("dish_*");
+
         return Result.success();
     }
 
@@ -62,6 +75,10 @@ public class DishController {
     @PostMapping("/status/{status}")
     public Result startOrStop(@PathVariable("status") Integer status, Long id ){
         dishService.startOrStop(status,id);
+        // delete all dishes in redis
+        cleanCache("dish_*");
+
+
         return Result.success();
     }
 
@@ -70,6 +87,9 @@ public class DishController {
     public Result update(@RequestBody DishDTO dishDTO){
         log.info("Update dish: {}",dishDTO);
         dishService.updateAndFlavor(dishDTO);
+
+        // delete all dishes in redis
+        cleanCache("dish_*");
         return Result.success();
     }
 
@@ -79,6 +99,12 @@ public class DishController {
         log.info("Query dish by category id: {}", categoryId);
         List<Dish> dishes= dishService.list(categoryId);
         return Result.success(dishes);
+    }
+
+    // clear cache in redis
+    private void cleanCache(String pattern){
+        Set keys = redisTemplate.keys(pattern);
+        redisTemplate.delete(keys);
     }
 
 }

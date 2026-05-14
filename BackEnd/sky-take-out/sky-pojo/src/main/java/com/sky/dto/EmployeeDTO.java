@@ -19,4 +19,9 @@ public class EmployeeDTO implements Serializable {
 
     private String idNumber;
 
+    private String password;
+
+    private String role;
+
+
 }
