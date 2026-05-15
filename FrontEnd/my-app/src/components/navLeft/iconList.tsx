@@ -20,10 +20,13 @@ import {
   CommentOutlined,
   ThunderboltOutlined,
   TeamOutlined,
+  ContainerOutlined,
+  CoffeeOutlined,
+  AppstoreOutlined,
+  MenuOutlined,
 } from "@ant-design/icons";
 const icons: any = {
   DashboardOutlined: <DashboardOutlined />,
-  UserOutlined: <UserOutlined />,
   UnorderedListOutlined: <UnorderedListOutlined />,
   UserAddOutlined: <UserAddOutlined />,
   SettingOutlined: <SettingOutlined />,
@@ -43,6 +46,11 @@ const icons: any = {
   CommentOutlined: <CommentOutlined />,
   ThunderboltOutlined: <ThunderboltOutlined />,
   TeamOutlined: <TeamOutlined />,
+  ContainerOutlined: <ContainerOutlined />,
+  CoffeeOutlined: <CoffeeOutlined />,
+  AppstoreOutlined: <AppstoreOutlined />,
+  UserOutlined: <UserOutlined />,
+  MenuOutlined: <MenuOutlined />,
 };
 
 export default icons;
